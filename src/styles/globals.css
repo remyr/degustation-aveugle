@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.drop-shadow-btn {
+  filter: drop-shadow(0 6px 0px #1a1c4b);
+}
+.drop-shadow-disabled {
+  filter: drop-shadow(0 6px 0px #b7adbf);
+}
+.drop-shadow-response {
+  filter: drop-shadow(0 6px 0px #f4e5e9);
+}
+.drop-shadow-selected {
+  filter: drop-shadow(0 6px 0px #15803d);
+}

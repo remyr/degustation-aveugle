@@ -1,0 +1,1 @@
+export { DegustationButtonsList } from './DegustationButtonsList';
