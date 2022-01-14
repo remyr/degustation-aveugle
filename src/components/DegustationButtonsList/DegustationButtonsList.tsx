@@ -20,7 +20,7 @@ export const DegustationButtonsList = () => {
   const data = value?.data();
 
   return (
-    <div className='flex flex-col mt-8 space-y-4'>
+    <div className='flex flex-col pb-8 mt-8 space-y-4'>
       <Button
         full
         icon={<HiOutlinePlay className='mr-3 w-6 h-6' />}

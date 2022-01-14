@@ -13,11 +13,11 @@ const HomeSession = () => {
   }
 
   return (
-    <div className='flex flex-col justify-around items-center'>
+    <div className='flex flex-col justify-around items-center mt-8'>
       <div className='bg-darkGrey h-[250px] w-[250px] flex justify-center items-center p-10 rounded-full'>
         <BeerCelebration />
       </div>
-      <div className='px-10'>
+      <div className='px-10 mt-4'>
         <h1 className='flex items-center text-4xl font-semibold text-center text-black'>
           Dégustation à l&apos;aveugle
         </h1>

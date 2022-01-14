@@ -74,7 +74,7 @@ export const GameForm = () => {
         </h1>
         {/* <Step total={15} current={4} /> */}
       </div>
-      <div className='flex flex-col space-y-8 w-full'>
+      <div className='flex flex-col mt-8 space-y-8 w-full'>
         <ResponseButton
           text='Vin blanc'
           onClick={() => setSelected('blanc')}

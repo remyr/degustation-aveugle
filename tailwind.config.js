@@ -29,6 +29,10 @@ module.exports = {
         darkBlue: '#292C6D',
         darkGrey: '#F4E5E9',
       },
+      gridTemplateColumns: {
+        // Complex site-specific column configuration
+        table: '24px 60px 1fr',
+      },
       keyframes: {
         flicker: {
           '0%, 19.999%, 22%, 62.999%, 64%, 64.999%, 70%, 100%': {

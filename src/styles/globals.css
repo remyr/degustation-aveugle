@@ -8,6 +8,9 @@
 .drop-shadow-disabled {
   filter: drop-shadow(0 6px 0px #b7adbf);
 }
+.drop-shadow-light {
+  filter: drop-shadow(0 6px 0px #f4e5e9);
+}
 .drop-shadow-response {
   filter: drop-shadow(0 6px 0px #f4e5e9);
 }

@@ -12,10 +12,9 @@ function MyApp({ Component, pageProps }: AppProps) {
         body > div:first-child,
         div#__next,
         div#__next > div {
-          height: 100%;
+          min-height: 100%;
         }
       `}</style>
-      ;
     </>
   );
 }
