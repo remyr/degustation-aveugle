@@ -50,6 +50,12 @@ export const DegustationButtonsList = () => {
         icon={<HiOutlineCog className='mr-3 w-6 h-6' />}
         text='Configurer la dégustation'
         disabled={loading}
+        onClick={() =>
+          router.push({
+            pathname: '/degustation/[id]/settings',
+            query: { id: value?.id },
+          })
+        }
       />
     </div>
   );
