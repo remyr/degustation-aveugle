@@ -1,9 +1,9 @@
 import { createCollection } from '@/utils/createCollection';
 
-import { BOTTLE_TYPE } from './Bottle';
+import { BottleType } from './Bottle';
 
 export interface Answer {
-  answer: BOTTLE_TYPE;
+  answer: BottleType;
   bottle: string;
   player: string;
 }
