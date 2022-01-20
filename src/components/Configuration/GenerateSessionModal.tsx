@@ -70,11 +70,14 @@ export const GenerateSessionModal: FC<GenerateSessionModalProps> = ({
               <div className='flex flex-col mt-2 space-y-4'>
                 <input
                   className='border-darkBlue py-2 w-full rounded-lg border focus:border-darkBlue focus:ring-darkBlue'
+                  inputMode='numeric'
                   type='number'
+                  pattern='[0-9]*'
                   name='rounds'
                   placeholder='Nombre de round'
                   defaultValue={defaultRounds}
                   min={defaultRounds}
+                  max={defaultRounds * 2}
                 />
               </div>
 
