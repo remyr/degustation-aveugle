@@ -1,37 +1,16 @@
 import cx from 'classnames';
-import { onSnapshot } from 'firebase/firestore';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { FC } from 'react';
 
-import { Bottle, bottleCollection } from '@/models/Bottle';
+import { Bottle } from '@/models/Bottle';
 import { CollectionWithId } from '@/utils/genericFirebaseType';
 
-export const SettingsTable = () => {
-  const router = useRouter();
-  const [bottles, setBottles] = useState<CollectionWithId<Bottle>[]>([]);
-  const [_loading, setLoading] = useState(true);
+interface BottleTableProps {
+  bottles: CollectionWithId<Bottle>[];
+}
 
-  const id = router.query.id as string;
-
-  useEffect(() => {
-    if (!id) {
-      return;
-    }
-
-    const unsubscribe = onSnapshot(bottleCollection(id), (snapshot) => {
-      const bottlesDocuments = snapshot.docs.map((doc) => ({
-        ...doc.data(),
-        id: doc.id,
-      }));
-      setBottles(bottlesDocuments);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [id]);
-
+export const BottleTable: FC<BottleTableProps> = ({ bottles }) => {
   return (
-    <div className='px-6 mt-8'>
+    <div className='mt-6'>
       {bottles.length === 0 ? (
         <div>
           <p className='text-center'>Aucune bouteilles</p>

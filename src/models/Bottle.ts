@@ -13,5 +13,14 @@ export interface Bottle {
   type: BottleType;
 }
 
+export interface GeneratedBottle extends Bottle {
+  order: number;
+}
+
 export const bottleCollection = (degustationId: string) =>
   createCollection<Bottle>(`degustation/${degustationId}/bottles`);
+
+export const generatedBottleCollection = (degustationId: string) =>
+  createCollection<GeneratedBottle>(
+    `degustation/${degustationId}/generatedBottles`
+  );

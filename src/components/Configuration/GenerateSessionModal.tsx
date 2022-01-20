@@ -1,31 +1,26 @@
 import { Dialog, Transition } from '@headlessui/react';
 import { FC, Fragment, SyntheticEvent } from 'react';
 
-import { Bottle, BottleType } from '@/models/Bottle';
-
-interface CreateBottleModalProps {
+interface GenerateSessionModalProps {
   isOpen: boolean;
+  generate: (rounds: number) => void;
+  defaultRounds: number;
   close: () => void;
-  submit: (data: Bottle) => void;
 }
 
-export const CreateBottleModal: FC<CreateBottleModalProps> = ({
+export const GenerateSessionModal: FC<GenerateSessionModalProps> = ({
   isOpen,
+  generate,
+  defaultRounds,
   close,
-  submit,
 }) => {
   const submitForm = (e: SyntheticEvent) => {
     e.preventDefault();
     const target = e.target as typeof e.target & {
-      type: { value: BottleType };
-      label: { value: string };
+      rounds: { value: number };
     };
-    const data = {
-      type: target.type.value,
-      label: target.label.value,
-    };
-
-    submit(data);
+    generate(target.rounds.value);
+    close();
   };
 
   return (
@@ -47,8 +42,6 @@ export const CreateBottleModal: FC<CreateBottleModalProps> = ({
           >
             <Dialog.Overlay className='fixed inset-0 bg-black opacity-50' />
           </Transition.Child>
-
-          {/* This element is to trick the browser into centering the modal contents. */}
           <span
             className='inline-block h-screen align-middle'
             aria-hidden='true'
@@ -72,22 +65,17 @@ export const CreateBottleModal: FC<CreateBottleModalProps> = ({
                 as='h3'
                 className='text-lg font-medium leading-6 text-gray-900'
               >
-                Ajouter une bouteille
+                Nombre de rounds à créer
               </Dialog.Title>
               <div className='flex flex-col mt-2 space-y-4'>
                 <input
                   className='border-darkBlue py-2 w-full rounded-lg border focus:border-darkBlue focus:ring-darkBlue'
-                  type='text'
-                  name='label'
+                  type='number'
+                  name='rounds'
+                  placeholder='Nombre de round'
+                  defaultValue={defaultRounds}
+                  min={defaultRounds}
                 />
-                <select
-                  name='type'
-                  className='border-darkBlue py-2 w-full rounded-lg border focus:border-darkBlue focus:ring-darkBlue'
-                >
-                  <option>{BottleType.Blanc}</option>
-                  <option>{BottleType.Rose}</option>
-                  <option>{BottleType.Rouge}</option>
-                </select>
               </div>
 
               <div className='flex justify-end mt-4 space-x-2'>
@@ -101,7 +89,7 @@ export const CreateBottleModal: FC<CreateBottleModalProps> = ({
                 <input
                   type='submit'
                   className='inline-flex justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 rounded-md border border-transparent hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2'
-                  value='Enregistrer'
+                  value='Générer'
                 />
               </div>
             </form>

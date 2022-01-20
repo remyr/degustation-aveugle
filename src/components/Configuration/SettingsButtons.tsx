@@ -1,6 +1,6 @@
-import { addDoc, updateDoc } from 'firebase/firestore';
+import { addDoc } from 'firebase/firestore';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { FC, useState } from 'react';
 import {
   HiOutlineDocumentText,
   HiOutlinePlay,
@@ -8,12 +8,25 @@ import {
 } from 'react-icons/hi';
 
 import { Bottle, bottleCollection } from '@/models/Bottle';
-import { degustationDocument } from '@/models/Degustation';
 
 import { CreateBottleModal } from './CreateBottleModal';
 import { Button } from '../Button';
 
-export const SettingsButtons = () => {
+interface SettingsButtonsProps {
+  addButtonDisabled?: boolean;
+  startButtonDisabled?: boolean;
+  generateButtonDisabled?: boolean;
+  generateSession: () => void;
+  startSession: () => void;
+}
+
+export const SettingsButtons: FC<SettingsButtonsProps> = ({
+  addButtonDisabled,
+  startButtonDisabled,
+  generateButtonDisabled,
+  generateSession,
+  startSession,
+}) => {
   const router = useRouter();
   const [isModalOpen, setModalOpen] = useState(false);
 
@@ -25,14 +38,6 @@ export const SettingsButtons = () => {
     setModalOpen(false);
   };
 
-  const startSession = async () => {
-    await updateDoc(degustationDocument(id), { started: true, ended: true });
-    router.push({
-      pathname: '/degustation/[id]/',
-      query: { id },
-    });
-  };
-
   return (
     <div className='flex flex-col px-6 mt-8 space-y-4'>
       <Button
@@ -40,17 +45,21 @@ export const SettingsButtons = () => {
         onClick={() => setModalOpen(true)}
         text='Ajouter une bouteille'
         full
+        disabled={addButtonDisabled}
       />
       <Button
         icon={<HiOutlineDocumentText className='mr-1 text-xl' />}
         text='Générer une dégustation'
         full
+        disabled={generateButtonDisabled}
+        onClick={generateSession}
       />
       <Button
         icon={<HiOutlinePlay className='mr-1 text-xl' />}
         text='Démarrer la session'
         full
         onClick={startSession}
+        disabled={startButtonDisabled}
       />
       <CreateBottleModal
         isOpen={isModalOpen}
