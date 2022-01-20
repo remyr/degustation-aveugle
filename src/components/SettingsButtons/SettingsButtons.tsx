@@ -1,4 +1,4 @@
-import { addDoc } from 'firebase/firestore';
+import { addDoc, updateDoc } from 'firebase/firestore';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import {
@@ -8,6 +8,7 @@ import {
 } from 'react-icons/hi';
 
 import { Bottle, bottleCollection } from '@/models/Bottle';
+import { degustationDocument } from '@/models/Degustation';
 
 import { CreateBottleModal } from './CreateBottleModal';
 import { Button } from '../Button';
@@ -20,10 +21,16 @@ export const SettingsButtons = () => {
 
   const createBottle = async (data: Bottle) => {
     if (!id) return;
-
     await addDoc(bottleCollection(id), data);
-
     setModalOpen(false);
+  };
+
+  const startSession = async () => {
+    await updateDoc(degustationDocument(id), { started: true, ended: true });
+    router.push({
+      pathname: '/degustation/[id]/',
+      query: { id },
+    });
   };
 
   return (
@@ -43,6 +50,7 @@ export const SettingsButtons = () => {
         icon={<HiOutlinePlay className='mr-1 text-xl' />}
         text='Démarrer la session'
         full
+        onClick={startSession}
       />
       <CreateBottleModal
         isOpen={isModalOpen}

@@ -50,6 +50,12 @@ export const DegustationButtonsList = () => {
         icon={<HiOutlineChartBar className='mr-3 w-6 h-6' />}
         text='Voir les résultats'
         disabled={loading || !data?.ended}
+        onClick={() =>
+          router.push({
+            pathname: '/degustation/[id]/results',
+            query: { id: value?.id },
+          })
+        }
       />
       <CopyToClipboard
         text={textToCopy()}
