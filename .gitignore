@@ -38,6 +38,7 @@ robots.txt
 sitemap.xml
 
 # firestore
+database-debug.log
 firestore-debug.log
 firebase-debug.log
 firebase-debug.*.log

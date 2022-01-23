@@ -1,66 +1,93 @@
-import { addDoc, collection } from 'firebase/firestore';
-import Cookies from 'js-cookie';
+import { signInAnonymously } from 'firebase/auth';
+import { addDoc, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
-import { useCollection } from 'react-firebase-hooks/firestore';
+import { useEffect, useState } from 'react';
 import { HiArrowRight } from 'react-icons/hi';
 
-import { db } from '@/firebase/client';
-import { bottleCollection } from '@/models/Bottle';
+import { auth } from '@/firebase/client';
+import { GeneratedBottle, generatedBottleCollection } from '@/models/Bottle';
+import { playerCollection } from '@/models/Player';
+import { CollectionWithId } from '@/utils/genericFirebaseType';
 
 import { Button } from '../Button';
 
 export const JoinForm = () => {
   const router = useRouter();
+  const [generatedBottles, setGeneratedBottles] = useState<
+    CollectionWithId<GeneratedBottle>[]
+  >([]);
   const [name, setName] = useState('');
+  const [error, setError] = useState<{ message: string } | null>(null);
 
   const id = router.query.id as string;
 
-  const [col, loading] = useCollection(bottleCollection(id));
-  const bottles = col?.docs.map((bottle) => ({ id: bottle.id }));
+  useEffect(() => {
+    if (!id) return;
+
+    const q = query(generatedBottleCollection(id), orderBy('order'));
+
+    return onSnapshot(q, (snapshot) => {
+      const bottlesDocuments = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setGeneratedBottles(bottlesDocuments);
+    });
+  }, [id]);
 
   const joinDegustation = async () => {
-    if (name === '') {
+    if (name === '' || !generatedBottles || generatedBottles?.length === 0) {
       return;
     }
 
-    if (!bottles || bottles?.length === 0) {
-      return;
+    try {
+      const { user } = await signInAnonymously(auth);
+      const { uid } = user;
+
+      try {
+        await addDoc(playerCollection(id), {
+          name,
+          uid,
+        });
+
+        router.push({
+          pathname: '/degustation/[id]/game',
+          query: {
+            id,
+            bottle: generatedBottles[0].id,
+          },
+        });
+      } catch (error) {
+        setError({ message: "Impossible d'ajouter un joueur." });
+      }
+    } catch (error) {
+      setError({ message: 'Impossible de se connecter.' });
     }
 
-    const data = {
-      name,
-    };
-
-    const player = await addDoc(
-      collection(db, 'degustation', id, 'players'),
-      data
-    );
-
-    Cookies.set('player', player.id);
-    router.push({
-      pathname: '/degustation/[id]/game',
-      query: {
-        id,
-        bottle: bottles[0].id,
-      },
-    });
+    setName('');
   };
 
   return (
     <div className='flex flex-col mt-8 space-y-8 w-full'>
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        type='text'
-        placeholder='Entrez votre nom'
-        className='border-darkBlue py-3 w-full rounded-xl border focus:border-darkBlue focus:ring-darkBlue'
-      />
+      <div>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          type='text'
+          placeholder='Entrez votre nom'
+          className='border-darkBlue py-3 w-full rounded-xl border focus:border-darkBlue focus:ring-darkBlue'
+        />
+        {error && (
+          <p className='mt-1 text-xs text-red-500'>
+            {`Une erreur s'est produite: ${error?.message}`}
+          </p>
+        )}
+      </div>
       <Button
         full
         icon={<HiArrowRight className='mr-3 w-6 h-6' />}
         text='Démarrer'
-        disabled={name === '' || loading}
+        disabled={name === ''}
         flat
         onClick={joinDegustation}
       />
