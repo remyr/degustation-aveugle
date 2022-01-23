@@ -5,8 +5,8 @@ import { BottleType } from './Bottle';
 export interface Answer {
   answer: BottleType;
   bottle: string;
-  player: string;
+  userId: string;
 }
 
-export const answerCollection = (degustationId: string) =>
+export const answersCollection = (degustationId: string) =>
   createCollection<Answer>(`degustation/${degustationId}/answers`);

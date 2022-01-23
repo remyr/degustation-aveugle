@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useCollection } from 'react-firebase-hooks/firestore';
 
-import { Answer, answerCollection } from '@/models/Answer';
+import { Answer, answersCollection } from '@/models/Answer';
 import { Bottle, bottleCollection } from '@/models/Bottle';
 import { playerCollection } from '@/models/Player';
 
@@ -31,7 +31,7 @@ export const Results = () => {
     {}
   );
   const [answersSnapshot, isAnswersLoading] = useCollection(
-    answerCollection(id)
+    answersCollection(id)
   );
   const [playerSnapshot, isPlayerLoading] = useCollection(playerCollection(id));
 

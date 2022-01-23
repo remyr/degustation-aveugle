@@ -1,45 +1,54 @@
-import { addDoc, collection } from 'firebase/firestore';
-import Cookies from 'js-cookie';
+import { onAuthStateChanged } from 'firebase/auth';
+import { addDoc, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { useCollection } from 'react-firebase-hooks/firestore';
 import { BiTrophy } from 'react-icons/bi';
 import { HiArrowRight } from 'react-icons/hi';
 
-import { db } from '@/firebase/client';
-import { BOTTLE_TYPE, bottleCollection } from '@/models/Bottle';
+import { auth } from '@/firebase/client';
+import { answersCollection } from '@/models/Answer';
+import { BottleType, generatedBottleCollection } from '@/models/Bottle';
 
 import { Button } from '../Button';
 import { ResponseButton } from '../ResponseButton';
 
 export const GameForm = () => {
   const router = useRouter();
-  const [selected, setSelected] = useState<BOTTLE_TYPE | null>(null);
+  const [selected, setSelected] = useState<BottleType | null>(null);
   const [currentBottle, setCurrentBottle] = useState<number>(0);
   const [nextBottle, setNextBottle] = useState<string | null>(null);
+  const [loggedUser, setLoggedUser] = useState<string | null>(null);
 
   const id = router.query.id as string;
   const bottleId = router.query.bottle as string;
 
-  const [col, loading] = useCollection(bottleCollection(id));
+  useEffect(() => {
+    if (!id) return;
+
+    const q = query(generatedBottleCollection(id), orderBy('order'));
+
+    return onSnapshot(q, (snapshot) => {
+      const bottleIds = snapshot.docs.map((doc) => doc.id);
+      setCurrentBottle(bottleIds?.indexOf(bottleId));
+      setNextBottle(bottleIds[(currentBottle + 1) as number] || null);
+    });
+  }, [bottleId, currentBottle, id]);
 
   useEffect(() => {
-    const bottles = col?.docs.map((bottle) => bottle.id) || [];
-    setCurrentBottle(bottles?.indexOf(bottleId));
-    setNextBottle(bottles[(currentBottle + 1) as number] || null);
-  }, [bottleId, col?.docs, currentBottle]);
-
-  // const currentBottle = bottles?.indexOf(bottleId);
-  // const nextBottle = bottles[(currentBottle + 1) as number] || null;
+    return onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const uid = user.uid;
+        setLoggedUser(uid);
+      }
+    });
+  }, []);
 
   const guess = async () => {
-    const playerId = Cookies.get('player');
-    if (!playerId) {
+    if (selected === null || loggedUser === null) {
       return;
     }
-
-    await addDoc(collection(db, 'degustation', id, 'answers'), {
-      player: playerId,
+    await addDoc(answersCollection(id), {
+      userId: loggedUser,
       answer: selected,
       bottle: bottleId,
     });
@@ -53,7 +62,6 @@ export const GameForm = () => {
           id,
         },
       });
-
       return;
     }
 
@@ -77,18 +85,18 @@ export const GameForm = () => {
       <div className='flex flex-col mt-8 space-y-8 w-full'>
         <ResponseButton
           text='Vin blanc'
-          onClick={() => setSelected('blanc')}
-          selected={selected === 'blanc'}
+          onClick={() => setSelected(BottleType.Blanc)}
+          selected={selected === BottleType.Blanc}
         />
         <ResponseButton
           text='Vin rosé'
-          onClick={() => setSelected('rose')}
-          selected={selected === 'rose'}
+          onClick={() => setSelected(BottleType.Rose)}
+          selected={selected === BottleType.Rose}
         />
         <ResponseButton
           text='Vin rouge'
-          onClick={() => setSelected('rouge')}
-          selected={selected === 'rouge'}
+          onClick={() => setSelected(BottleType.Rouge)}
+          selected={selected === BottleType.Rouge}
         />
       </div>
       <div className='flex flex-col mt-8 w-full'>
@@ -97,7 +105,7 @@ export const GameForm = () => {
             full
             icon={<BiTrophy className='mr-3 w-6 h-6' />}
             text='Voir les résultats'
-            disabled={selected === null || loading}
+            disabled={selected === null}
             onClick={guess}
           />
         ) : (
@@ -105,7 +113,7 @@ export const GameForm = () => {
             full
             icon={<HiArrowRight className='mr-3 w-6 h-6' />}
             text='Bouteille suivante'
-            disabled={selected === null || loading}
+            disabled={selected === null}
             onClick={guess}
           />
         )}
