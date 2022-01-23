@@ -6,12 +6,9 @@ interface ScoreTableProps {
 
 export const ScoreTable: FC<ScoreTableProps> = ({ scores }) => {
   return (
-    <div className='flex flex-col space-y-8'>
+    <div className='flex flex-col mt-8 space-y-8'>
       <div>
-        <h1 className='mb-4 text-xl font-semibold text-black border-b border-black'>
-          Scores
-        </h1>
-        <div className='bg-[#EEE2E5] grid-cols-table grid gap-4 px-4 py-1 text-sm rounded-t-lg'>
+        <div className='bg-[#EEE2E5] grid-cols-table grid gap-4 px-4 py-1 rounded-t-lg'>
           <div>#</div>
           <div>Score</div>
           <div>Personne</div>
@@ -21,7 +18,7 @@ export const ScoreTable: FC<ScoreTableProps> = ({ scores }) => {
           .map((row, index) => (
             <div
               key={`bottle-${index}`}
-              className='grid-cols-table grid gap-4 px-4 py-2 text-xs bg-white'
+              className='grid-cols-table grid gap-4 px-4 py-2 text-sm bg-white'
             >
               <div>{index + 1}</div>
               <div className='text-capitalize font-bold'>

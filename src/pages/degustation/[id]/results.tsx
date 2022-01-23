@@ -11,9 +11,21 @@ const ResultPage = () => {
     return null;
   }
 
+  const goToHomeSession = () => {
+    if (!id) return;
+
+    router.push({
+      pathname: '/degustation/[id]/',
+      query: { id },
+    });
+  };
+
   return (
     <div className='flex flex-col items-center'>
-      <div className='border-[15px] h-[200px] w-[200px] flex justify-center items-center my-8 mt-12 bg-white rounded-full border-yellow-500'>
+      <div
+        onClick={goToHomeSession}
+        className='border-[15px] h-[200px] w-[200px] flex justify-center items-center my-8 mt-12 bg-white rounded-full border-yellow-500 hover:cursor-pointer'
+      >
         <BiTrophy className='h-[120px] text-darkBlue w-[120px]' />
       </div>
       <Results />

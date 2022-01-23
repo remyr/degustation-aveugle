@@ -1,178 +1,207 @@
-import cx from 'classnames';
-import Cookies from 'js-cookie';
+import { onAuthStateChanged } from 'firebase/auth';
+import { onSnapshot, orderBy, query } from 'firebase/firestore';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import { useCollection } from 'react-firebase-hooks/firestore';
+import { useCallback, useEffect, useState } from 'react';
 
+import { auth } from '@/firebase/client';
 import { Answer, answersCollection } from '@/models/Answer';
-import { Bottle, bottleCollection } from '@/models/Bottle';
-import { playerCollection } from '@/models/Player';
+import {
+  BottleType,
+  GeneratedBottle,
+  generatedBottleCollection,
+} from '@/models/Bottle';
+import { Player, playerCollection } from '@/models/Player';
+import { CollectionWithId } from '@/utils/genericFirebaseType';
 
-import { AnswersTable } from './AnswersTable';
-import { ScoreTable } from './ScoreTable';
+import { Tabs } from './Tabs';
 
 export const Results = () => {
   const router = useRouter();
-  const [playerScore, setPlayerScore] = useState(0);
-  const [totalAnswer, setTotalAnswer] = useState(0);
-  const [bottleAnswers, setBottleAnswers] =
-    useState<Array<Bottle & { id: string }>>();
-  const [playerAnswers, setPlayerAnswers] = useState<Answer[]>();
-  const [tab, setTab] = useState('score');
-  const [scores, setScores] = useState<
-    { name: string; score: number; total: number }[]
-  >([]);
+  const [generatedBottles, setGeneratedBottles] =
+    useState<CollectionWithId<GeneratedBottle>[]>();
+  const [answers, setAnswers] = useState<CollectionWithId<Answer>[]>();
+  const [players, setPlayers] = useState<CollectionWithId<Player>[]>();
+  const [loggedUser, setLoggedUser] = useState<string | null>(null);
 
-  const playerId = Cookies.get('player');
   const id = router.query.id as string;
 
-  const [bottleSnapshot, isBottleLoading] = useCollection(
-    bottleCollection(id),
-    {}
-  );
-  const [answersSnapshot, isAnswersLoading] = useCollection(
-    answersCollection(id)
-  );
-  const [playerSnapshot, isPlayerLoading] = useCollection(playerCollection(id));
-
+  // Get current logged user
   useEffect(() => {
-    const bottles = bottleSnapshot?.docs.map((bottle) => ({
-      id: bottle.id,
-      ...bottle.data(),
-    }));
-    setBottleAnswers(bottles);
-  }, [bottleSnapshot]);
+    return onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const uid = user.uid;
+        setLoggedUser(uid);
+      }
+    });
+  }, []);
 
+  // Get generated bottles
   useEffect(() => {
-    if (!playerSnapshot || !answersSnapshot || !bottleSnapshot) {
-      return;
-    }
-    const answers = answersSnapshot?.docs.map((answer) => ({
-      id: answer.id,
-      ...answer.data(),
-    }));
-    const bottles = bottleSnapshot.docs.reduce<Record<string, Bottle>>(
-      (acc, bottle) => {
-        return {
-          ...acc,
-          [bottle.id]: {
-            id: bottle.id,
-            ...bottle.data(),
-          },
-        };
-      },
-      {}
-    );
+    if (!id) return;
 
-    const playersScore = playerSnapshot.docs.map((player) => {
-      const currentPlayerAnswers = answers.filter(
-        (answer) => answer.player === player.id
+    const q = query(generatedBottleCollection(id), orderBy('order'));
+
+    return onSnapshot(q, (snapshot) => {
+      const bottles = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setGeneratedBottles(bottles);
+    });
+  }, [id]);
+
+  // Get player answers
+  useEffect(() => {
+    if (!id) return;
+
+    return onSnapshot(answersCollection(id), (snapshot) => {
+      const answers = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setAnswers(answers);
+    });
+  }, [id]);
+
+  // Get players
+  useEffect(() => {
+    if (!id) return;
+
+    return onSnapshot(playerCollection(id), (snapshot) => {
+      const players = snapshot.docs.map((doc) => ({
+        ...doc.data(),
+        id: doc.id,
+      }));
+      setPlayers(players);
+    });
+  }, [id]);
+
+  const getCurrentPlayer = useCallback(
+    (id?: string) => {
+      if (!players) return null;
+
+      if (generatedBottles?.length === 0 || answers?.length === 0) {
+        return null;
+      }
+
+      const playerUids = players?.map((player) => player.uid);
+      if (!playerUids || playerUids.length === 0 || !loggedUser) {
+        return null;
+      }
+
+      const criteria = id ? id : loggedUser;
+
+      const currentPlayerIndex = playerUids.indexOf(criteria);
+      const player = players?.[currentPlayerIndex];
+
+      return player;
+    },
+    [answers, generatedBottles, loggedUser, players]
+  );
+
+  const calulPlayerScore = useCallback(
+    (id?: string) => {
+      const player = getCurrentPlayer(id);
+
+      if (!player) {
+        return 0;
+      }
+
+      if (!generatedBottles || !answers) return 0;
+
+      const bottlesMap = generatedBottles.reduce<Record<string, BottleType>>(
+        (acc, bottle) => {
+          return { ...acc, [bottle.id]: bottle.type };
+        },
+        {}
       );
-      const currentPlayerScore = currentPlayerAnswers.reduce((acc, answer) => {
-        if (bottles && bottles[answer.bottle]) {
-          if (bottles[answer.bottle].type === answer.answer) {
-            return acc + 1;
-          }
-          return acc;
+
+      const playerAnswers = answers.filter(
+        (answer) => answer.userId === player?.uid
+      );
+
+      const score = playerAnswers.reduce((acc, answer) => {
+        if (bottlesMap[answer.bottle] === answer.answer) {
+          return acc + 1;
         }
+
         return acc;
       }, 0);
 
+      return score;
+    },
+    [answers, generatedBottles, getCurrentPlayer]
+  );
+
+  const calulPlayerScoreDetail = useCallback(
+    (id?: string) => {
+      const player = getCurrentPlayer(id);
+
+      if (!player) {
+        return [];
+      }
+
+      if (!generatedBottles || !answers) return [];
+
+      const bottlesMap = generatedBottles.reduce<Record<string, BottleType>>(
+        (acc, bottle) => {
+          return { ...acc, [bottle.id]: bottle.type };
+        },
+        {}
+      );
+
+      const playerAnswers = answers.filter(
+        (answer) => answer.userId === player?.uid
+      );
+
+      const score = playerAnswers.reduce<Record<string, number>>(
+        (acc, answer) => {
+          if (bottlesMap[answer.bottle] === answer.answer) {
+            return { ...acc, [answer.id]: 1 };
+          }
+
+          return { ...acc, [answer.id]: 0 };
+        },
+        {}
+      );
+
+      return Object.keys(score).map((k) => score[k]);
+    },
+    [answers, generatedBottles, getCurrentPlayer]
+  );
+
+  const getScores = useCallback(() => {
+    if (!generatedBottles || !players || !answers) return [];
+
+    const scores = players.map((player) => {
+      const playerScore = calulPlayerScore(player.uid);
+
       return {
-        name: player.data().name,
-        score: currentPlayerScore,
-        total: bottleSnapshot.docs.length,
+        name: player.name,
+        score: playerScore,
+        total: generatedBottles.length,
       };
     });
 
-    setScores(playersScore);
-  }, [playerSnapshot, answersSnapshot, bottleSnapshot]);
-
-  useEffect(() => {
-    const bottles = bottleSnapshot?.docs.reduce<Record<string, Bottle>>(
-      (acc, bottle) => {
-        return {
-          ...acc,
-          [bottle.id]: {
-            id: bottle.id,
-            ...bottle.data(),
-          },
-        };
-      },
-      {}
-    );
-    const answers = answersSnapshot?.docs.map((answer) => ({
-      id: answer.id,
-      ...answer.data(),
-    }));
-    const pAnswers = answers?.filter((answer) => answer.player === playerId);
-
-    setPlayerAnswers(pAnswers || []);
-
-    const pscore = pAnswers?.reduce((acc, answer) => {
-      if (bottles && bottles[answer.bottle]) {
-        if (bottles[answer.bottle].type === answer.answer) {
-          return acc + 1;
-        }
-        return acc;
-      }
-      return acc;
-    }, 0);
-
-    setPlayerScore(pscore || 0);
-    setTotalAnswer(pAnswers?.length || 0);
-  }, [answersSnapshot, bottleSnapshot, playerId]);
+    return scores;
+  }, [answers, calulPlayerScore, generatedBottles, players]);
 
   return (
-    <div className='px-4 w-full'>
-      {isAnswersLoading || isBottleLoading || isPlayerLoading ? (
-        <p className='text-xl text-center text-black'>Calcul des scores...</p>
-      ) : (
-        <>
-          <h1 className='text-4xl text-center text-black'>
-            Score{' '}
-            <span className='font-bold'>
-              {playerScore}/{totalAnswer}
-            </span>
-          </h1>
-          <div className='mt-8'>
-            <ul className='drop-shadow-light flex justify-between p-2 bg-white rounded-xl'>
-              <li
-                className={cx(
-                  'rounded-[0.5rem] flex justify-center items-center px-8 py-2 text-center',
-                  tab === 'score'
-                    ? 'shadow text-white bg-darkBlue'
-                    : 'text-black bg-white'
-                )}
-                onClick={() => setTab('score')}
-              >
-                Tableau des scores
-              </li>
-              <li
-                // className={cx(' px-8 py-2 rounded-[0.5rem] ', { 'shadow text-white bg-darkBlue': tab === 'score'})}
-                className={cx(
-                  'rounded-[0.5rem] flex justify-center items-center px-8 py-2 text-center',
-                  tab === 'answers'
-                    ? 'shadow text-white bg-darkBlue'
-                    : 'text-black bg-white'
-                )}
-                onClick={() => setTab('answers')}
-              >
-                Réponses
-              </li>
-            </ul>
-          </div>
-          <div className='mt-8'>
-            {tab === 'answers' && (
-              <AnswersTable
-                playerAnswers={playerAnswers || []}
-                bottles={bottleAnswers || []}
-              />
-            )}
-            {tab === 'score' && <ScoreTable scores={scores} />}
-          </div>
-        </>
-      )}
+    <div className='w-full'>
+      <h1 className='text-4xl text-center text-black'>
+        Score{' '}
+        <span className='font-bold'>
+          {calulPlayerScore()}/{generatedBottles?.length}
+        </span>
+      </h1>
+      <div className='flex justify-between items-center px-8 mt-2 w-full'>
+        {calulPlayerScoreDetail().map((detail, index) => (
+          <span key={`detail-${index}`}>{detail === 1 ? `✅` : `❌`}</span>
+        ))}
+      </div>
+      <div>
+        <Tabs bottles={generatedBottles || []} scores={getScores()} />
+      </div>
     </div>
   );
 };

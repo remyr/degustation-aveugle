@@ -1,39 +1,32 @@
 import { FC } from 'react';
 
-import { Answer } from '@/models/Answer';
-import { Bottle } from '@/models/Bottle';
+import { GeneratedBottle } from '@/models/Bottle';
+import { CollectionWithId } from '@/utils/genericFirebaseType';
 
 interface AnswersTableProps {
-  bottles: Array<Bottle & { id: string }>;
-  playerAnswers: Answer[];
+  generatedBottles: CollectionWithId<GeneratedBottle>[];
 }
 
-export const AnswersTable: FC<AnswersTableProps> = ({
-  bottles,
-  playerAnswers: pAnswers,
-}) => {
-  const playerAnswers = pAnswers.reduce<Record<string, string>>(
-    (acc, value) => {
-      return { ...acc, [value.bottle]: value.answer };
-    },
-    {}
-  );
+export const AnswersTable: FC<AnswersTableProps> = ({ generatedBottles }) => {
+  // const playerAnswers = pAnswers.reduce<Record<string, string>>(
+  //   (acc, value) => {
+  //     return { ...acc, [value.bottle]: value.answer };
+  //   },
+  //   {}
+  // );
 
   return (
-    <div className='flex flex-col space-y-8'>
+    <div className='flex flex-col mt-8 space-y-8'>
       <div>
-        <h1 className='mb-4 text-xl font-semibold text-black border-b border-black'>
-          Réponses
-        </h1>
-        <div className='bg-[#EEE2E5] grid-cols-table grid gap-4 px-4 py-1 text-sm rounded-t-lg'>
+        <div className='bg-[#EEE2E5] grid-cols-table grid gap-4 px-4 py-1 rounded-t-lg'>
           <div>#</div>
           <div>Type</div>
           <div>Bouteille</div>
         </div>
-        {bottles.map((bottle, index) => (
+        {generatedBottles.map((bottle, index) => (
           <div
             key={`bottle-${index}`}
-            className='grid-cols-table grid gap-4 px-4 py-2 text-xs bg-white'
+            className='grid-cols-table grid gap-4 px-4 py-2 text-sm bg-white'
           >
             <div>{index + 1}</div>
             <div className='text-capitalize'>{bottle.type}</div>
@@ -41,7 +34,7 @@ export const AnswersTable: FC<AnswersTableProps> = ({
           </div>
         ))}
       </div>
-      <div className='pb-8'>
+      {/* <div className='pb-8'>
         <h1 className='mb-4 text-xl font-semibold text-black border-b border-black'>
           Mes réponses
         </h1>
@@ -63,7 +56,7 @@ export const AnswersTable: FC<AnswersTableProps> = ({
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
     </div>
   );
 };
