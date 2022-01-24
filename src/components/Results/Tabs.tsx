@@ -27,7 +27,7 @@ export const Tabs: FC<TabsProps> = ({ scores, bottles }) => {
   }, [scores, bottles]);
 
   return (
-    <div className='px-6 my-8 w-full max-w-md'>
+    <div className='px-6 mx-auto my-8 w-full'>
       <Tab.Group>
         <Tab.List className='drop-shadow-light flex p-1 space-x-1 bg-white rounded-xl'>
           {Object.keys(categories).map((category) => (

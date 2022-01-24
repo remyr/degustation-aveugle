@@ -2,7 +2,8 @@
 import { useRouter } from 'next/router';
 
 import { DegustationButtonsList } from '@/components/DegustationButtonsList';
-import { BeerCelebration } from '@/components/Undraw/BeerCelebration';
+// import { BeerCelebration } from '@/components/Undraw/BeerCelebration';
+import { SessionGroup } from '@/components/Splash/SessionGroup';
 
 const HomeSession = () => {
   const router = useRouter();
@@ -14,8 +15,8 @@ const HomeSession = () => {
 
   return (
     <div className='flex flex-col justify-around items-center mt-8'>
-      <div className='bg-darkGrey h-[250px] w-[250px] flex justify-center items-center p-10 rounded-full'>
-        <BeerCelebration />
+      <div className='h-[250px] w-[250px] flex justify-center items-center'>
+        <SessionGroup />
       </div>
       <div className='px-10 mt-4'>
         <h1 className='flex items-center text-4xl font-semibold text-center text-black'>

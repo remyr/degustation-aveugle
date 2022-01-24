@@ -1,14 +1,35 @@
+import { useRouter } from 'next/router';
+
 import { Configuration } from '@/components/Configuration';
+import { Settings } from '@/components/Splash/Settings';
 
 const SettingsPage = () => {
+  const router = useRouter();
+  const id = router.query.id;
+
+  if (!id) {
+    return null;
+  }
+
+  const goToHomeSession = () => {
+    if (!id) return;
+
+    router.push({
+      pathname: '/degustation/[id]/',
+      query: { id },
+    });
+  };
   return (
-    <div>
-      <div className='flex justify-center items-center h-48 bg-white shadow-sm'>
-        <h1 className='px-8 text-3xl font-semibold text-center text-black'>
-          Configuration de la dégustation
-        </h1>
+    <div className='flex flex-col justify-around items-center mx-auto w-full max-w-lg'>
+      <div
+        onClick={goToHomeSession}
+        className='h-[250px] w-[250px] flex justify-center items-center p-4 hover:cursor-pointer'
+      >
+        <Settings />
       </div>
-      <Configuration />
+      <div className='w-full'>
+        <Configuration />
+      </div>
     </div>
   );
 };

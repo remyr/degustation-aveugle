@@ -39,7 +39,7 @@ export const SettingsButtons: FC<SettingsButtonsProps> = ({
   };
 
   return (
-    <div className='flex flex-col px-6 mt-8 space-y-4'>
+    <div className='flex flex-col px-6 mt-4 space-y-4'>
       <Button
         icon={<HiOutlinePlusCircle className='mr-1 text-xl' />}
         onClick={() => setModalOpen(true)}

@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
-import { BiTrophy } from 'react-icons/bi';
 
 import { Results } from '@/components/Results';
+import { Winner } from '@/components/Splash/Winner';
 
 const ResultPage = () => {
   const router = useRouter();
@@ -21,12 +21,12 @@ const ResultPage = () => {
   };
 
   return (
-    <div className='flex flex-col items-center'>
+    <div className='flex flex-col justify-center items-center mx-auto w-full max-w-lg'>
       <div
         onClick={goToHomeSession}
-        className='border-[15px] h-[200px] w-[200px] flex justify-center items-center my-8 mt-12 bg-white rounded-full border-yellow-500 hover:cursor-pointer'
+        className='h-[250px] w-[250px] flex justify-center items-center hover:cursor-pointer'
       >
-        <BiTrophy className='h-[120px] text-darkBlue w-[120px]' />
+        <Winner />
       </div>
       <Results />
     </div>

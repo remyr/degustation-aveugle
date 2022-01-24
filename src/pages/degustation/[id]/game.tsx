@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 
 import { GameForm } from '@/components/GameForm';
-import { UndrawWine } from '@/components/Undraw/Wine';
+import { Waiter } from '@/components/Splash/Waiter';
 
 const Game = () => {
   const router = useRouter();
@@ -12,11 +12,13 @@ const Game = () => {
   }
 
   return (
-    <div className='flex flex-col items-center'>
-      <div className='bg-darkGrey h-[200px] w-[200px] flex justify-center items-center p-6 my-8 rounded-full'>
-        <UndrawWine />
+    <div className='flex flex-col items-center mx-auto mt-8 max-w-lg'>
+      <div className='h-[250px] w-[250px] flex justify-center items-center p-4'>
+        <Waiter />
       </div>
-      <GameForm />
+      <div className='mt-8 w-full'>
+        <GameForm />
+      </div>
     </div>
   );
 };

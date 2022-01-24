@@ -133,42 +133,42 @@ export const Results = () => {
     [answers, generatedBottles, getCurrentPlayer]
   );
 
-  const calulPlayerScoreDetail = useCallback(
-    (id?: string) => {
-      const player = getCurrentPlayer(id);
+  // const calulPlayerScoreDetail = useCallback(
+  //   (id?: string) => {
+  //     const player = getCurrentPlayer(id);
 
-      if (!player) {
-        return [];
-      }
+  //     if (!player) {
+  //       return [];
+  //     }
 
-      if (!generatedBottles || !answers) return [];
+  //     if (!generatedBottles || !answers) return [];
 
-      const bottlesMap = generatedBottles.reduce<Record<string, BottleType>>(
-        (acc, bottle) => {
-          return { ...acc, [bottle.id]: bottle.type };
-        },
-        {}
-      );
+  //     const bottlesMap = generatedBottles.reduce<Record<string, BottleType>>(
+  //       (acc, bottle) => {
+  //         return { ...acc, [bottle.id]: bottle.type };
+  //       },
+  //       {}
+  //     );
 
-      const playerAnswers = answers.filter(
-        (answer) => answer.userId === player?.uid
-      );
+  //     const playerAnswers = answers.filter(
+  //       (answer) => answer.userId === player?.uid
+  //     );
 
-      const score = playerAnswers.reduce<Record<string, number>>(
-        (acc, answer) => {
-          if (bottlesMap[answer.bottle] === answer.answer) {
-            return { ...acc, [answer.id]: 1 };
-          }
+  //     const score = playerAnswers.reduce<Record<string, number>>(
+  //       (acc, answer) => {
+  //         if (bottlesMap[answer.bottle] === answer.answer) {
+  //           return { ...acc, [answer.id]: 1 };
+  //         }
 
-          return { ...acc, [answer.id]: 0 };
-        },
-        {}
-      );
+  //         return { ...acc, [answer.id]: 0 };
+  //       },
+  //       {}
+  //     );
 
-      return Object.keys(score).map((k) => score[k]);
-    },
-    [answers, generatedBottles, getCurrentPlayer]
-  );
+  //     return Object.keys(score).map((k) => score[k]);
+  //   },
+  //   [answers, generatedBottles, getCurrentPlayer]
+  // );
 
   const getScores = useCallback(() => {
     if (!generatedBottles || !players || !answers) return [];
@@ -194,11 +194,11 @@ export const Results = () => {
           {calulPlayerScore()}/{generatedBottles?.length}
         </span>
       </h1>
-      <div className='flex justify-between items-center px-8 mt-2 w-full'>
+      {/* <div className='flex justify-between items-center px-8 mt-2 w-full'>
         {calulPlayerScoreDetail().map((detail, index) => (
           <span key={`detail-${index}`}>{detail === 1 ? `✅` : `❌`}</span>
         ))}
-      </div>
+      </div> */}
       <div>
         <Tabs bottles={generatedBottles || []} scores={getScores()} />
       </div>
